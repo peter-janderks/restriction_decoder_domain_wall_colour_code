@@ -107,7 +107,7 @@ if __name__ == "__main__":
     n_runs = 1000000
     n_logical_errors = 10000
     bias = 0.5
-    cpus = 10
+    cpus = 20
     """
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 

@@ -1,4 +1,3 @@
-from cffi import FFI
 import os
 from layout import Hexagonal_layout
 import bidict as bd
