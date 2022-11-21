@@ -32,10 +32,10 @@ def calc_ratio():
         layout = Hexagonal_layout(i)
         noise_model = BiasedNoiseModelMock(0.1, 1, layout)
         flip_data_qubits = noise_model.get_data_qubits_to_flip()
-        print(len(flip_data_qubits) / len(layout.data_qubits), "layout",i)
+        print(len(flip_data_qubits) / len(layout.data_qubits), "layout", i)
 
 
-calc_ratio()
+# calc_ratio()
 
 
 def get_data_qubits_to_flip():
@@ -86,45 +86,16 @@ def get_data_qubits_to_flip():
         (18, 0),
     }
 
-    noise_model = BiasedNoiseModelMock(0.1, 1, d7layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d7layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d9layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d9layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d11layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d11layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d13layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d13layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d15layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d15layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d17layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d17layout.data_qubits))
-
-    noise_model = BiasedNoiseModelMock(0.1, 1, d19layout)
-    flip_data_qubits = noise_model.get_data_qubits_to_flip()
-    print(len(flip_data_qubits) / len(d19layout.data_qubits))
-
-
-# get_data_qubits_to_flip()
-
 
 def test_create_error_probabilities():
     noise_model = BiasedNoiseModelMock(0.1, 10, d3layout)
-    error_probability_dict = noise_model.create_error_probabilities()
+    (
+        error_probability_dict_X,
+        error_probability_dict_Z,
+    ) = noise_model.create_error_probabilities()
     pzy = (10 / (10 + 1) + 1 / (2 * 10 + 2)) * 0.1
     pxy = 2 / (2 * 10 + 2) * 0.1
-
-    comparison_probability_dict = {
+    comparison_probability_dict_X = {
         (0, 0): pxy,
         (4, 0): pzy,
         (6, 0): pzy,
@@ -133,7 +104,18 @@ def test_create_error_probabilities():
         (3, 3): pxy,
         (4, 2): pxy,
     }
-    assert error_probability_dict == comparison_probability_dict
+    comparison_probability_dict_Z = {
+        (0, 0): pzy,
+        (4, 0): pxy,
+        (6, 0): pxy,
+        (1, 1): pxy,
+        (3, 1): pxy,
+        (3, 3): pzy,
+        (4, 2): pzy,
+    }
+    assert error_probability_dict_X == comparison_probability_dict_X
+    assert error_probability_dict_Z == comparison_probability_dict_Z
+
 
 
 def test_create_random_error():

@@ -18,12 +18,15 @@ class Matching_graph:
         self.n_layers = 1
         self.distance = distance
         self.layout = Hexagonal_layout(distance)
-        # TODO add update edge weights
+
         self.initialize_nodes()
         self.initialize_edges()
         if error_model != None:
             self.error_model = error_model
-            self.update_weights_of_edges()
+            self.translate_error_model()
+            self.update_weights_of_edges(self.graphX)
+            self.update_weights_of_edges(self.graphZ)
+            self.init_pymatching_graph()
 
     def initialize_edges(self):
         self.graphX = X_or_Z_graph()
@@ -168,52 +171,73 @@ class Matching_graph:
             weight=0.0,
         )
 
-    def update_weights_of_edges(self):
-        self.translate_error_model()
-        for node_1, node_2 in self.graphX.red_blue.edges():
-            old_weight = self.graphX.red_blue[node_1][node_2]["error_probability"]
+    def update_weights_of_edges(self, graph):
+        for node_1, node_2 in graph.red_blue.edges():
+            old_weight = graph.red_blue[node_1][node_2]["error_probability"]
             if old_weight != 0:
 
-                self.graphX.red_blue[node_1][node_2]["weight"] = abs(
+                graph.red_blue[node_1][node_2]["weight"] = abs(
                     np.log((1 - old_weight) / old_weight)
                 )
-        for node_1, node_2 in self.graphX.blue_green.edges():
+        for node_1, node_2 in graph.blue_green.edges():
 
-            old_weight = self.graphX.blue_green[node_1][node_2]["error_probability"]
+            old_weight = graph.blue_green[node_1][node_2]["error_probability"]
             if old_weight != 0:
 
-                self.graphX.blue_green[node_1][node_2]["weight"] = abs(
+                graph.blue_green[node_1][node_2]["weight"] = abs(
                     np.log((1 - old_weight) / old_weight)
                 )
 
-        for node_1, node_2 in self.graphX.green_red.edges():
+        for node_1, node_2 in graph.green_red.edges():
 
-            old_weight = self.graphX.green_red[node_1][node_2]["error_probability"]
+            old_weight = graph.green_red[node_1][node_2]["error_probability"]
             if old_weight != 0:
 
-                self.graphX.green_red[node_1][node_2]["weight"] = abs(
+                graph.green_red[node_1][node_2]["weight"] = abs(
                     np.log((1 - old_weight) / old_weight)
                 )
         # loop through the weights one by one, add one by one
         # fix this to have boundary nodes
 
-        self.red_blue = Matching(self.graphX.red_blue)
-        self.red_blue.set_boundary_nodes(
+    def init_pymatching_graph(self):
+        self.red_blue_X = Matching(self.graphX.red_blue)
+        self.blue_green_X = Matching(self.graphX.blue_green)
+        self.green_red_X = Matching(self.graphX.green_red)
+        self.red_blue_X.set_boundary_nodes(
             {
                 len(self.layout.ancilla_qubits) + 2,
                 len(self.layout.ancilla_qubits) + 1,
             }
         )
-        self.blue_green = Matching(self.graphX.blue_green.copy())
-        self.blue_green.set_boundary_nodes(
+        self.blue_green_X.set_boundary_nodes(
             {
                 len(self.layout.ancilla_qubits) + 2,
                 len(self.layout.ancilla_qubits),
             }
         )
-        #        self.red_blue.set_boundary_nodes(len(self.graphX.red_blue.nodes() - 2))
-        self.green_red = Matching(self.graphX.green_red)
-        self.green_red.set_boundary_nodes(
+        self.green_red_X.set_boundary_nodes(
+            {
+                len(self.layout.ancilla_qubits),
+                len(self.layout.ancilla_qubits) + 1,
+            }
+        )
+
+        self.red_blue_Z = Matching(self.graphZ.red_blue)
+        self.blue_green_Z = Matching(self.graphZ.blue_green)
+        self.green_red_Z = Matching(self.graphZ.green_red)
+        self.red_blue_Z.set_boundary_nodes(
+            {
+                len(self.layout.ancilla_qubits) + 2,
+                len(self.layout.ancilla_qubits) + 1,
+            }
+        )
+        self.blue_green_Z.set_boundary_nodes(
+            {
+                len(self.layout.ancilla_qubits) + 2,
+                len(self.layout.ancilla_qubits),
+            }
+        )
+        self.green_red_Z.set_boundary_nodes(
             {
                 len(self.layout.ancilla_qubits),
                 len(self.layout.ancilla_qubits) + 1,
@@ -221,13 +245,21 @@ class Matching_graph:
         )
 
     def translate_error_model(self):
+        # translate single error needs to be given a graph...
+
         for (
             data_qubit,
             error_probability,
-        ) in self.error_model.error_probability_dict.items():
-            self.translate_single_error(data_qubit, error_probability)
+        ) in self.error_model.error_probability_dict_X.items():
+            self.translate_single_error(data_qubit, error_probability, self.graphX)
 
-    def translate_single_error(self, data_qubit, probability):
+        for (
+            data_qubit,
+            error_probability,
+        ) in self.error_model.error_probability_dict_Z.items():
+            self.translate_single_error(data_qubit, error_probability, self.graphZ)
+
+    def translate_single_error(self, data_qubit, probability, graph):
         ancilla_qubits = [
             self.layout.ancilla_coords_to_index[ancilla_qubit]
             for ancilla_qubit in self.layout.data_qubits_to_ancilla_qubits([data_qubit])
@@ -235,80 +267,80 @@ class Matching_graph:
         if len(ancilla_qubits) > 2:
             for ancilla_pair in it.combinations(ancilla_qubits, 2):
                 if (
-                    ancilla_pair[0] in self.graphX.red_blue.nodes()
-                    and ancilla_pair[1] in self.graphX.red_blue.nodes()
+                    ancilla_pair[0] in graph.red_blue.nodes()
+                    and ancilla_pair[1] in graph.red_blue.nodes()
                 ):
-                    self.graphX.red_blue[ancilla_pair[0]][ancilla_pair[1]][
+                    graph.red_blue[ancilla_pair[0]][ancilla_pair[1]][
                         "error_probability"
                     ] += probability
 
                 elif (
-                    ancilla_pair[0] in self.graphX.green_red.nodes()
-                    and ancilla_pair[1] in self.graphX.green_red.nodes()
+                    ancilla_pair[0] in graph.green_red.nodes()
+                    and ancilla_pair[1] in graph.green_red.nodes()
                 ):
-                    self.graphX.green_red[ancilla_pair[0]][ancilla_pair[1]][
+                    graph.green_red[ancilla_pair[0]][ancilla_pair[1]][
                         "error_probability"
                     ] += probability
 
                 elif (
-                    ancilla_pair[0] in self.graphX.blue_green.nodes()
-                    and ancilla_pair[1] in self.graphX.blue_green.nodes()
+                    ancilla_pair[0] in graph.blue_green.nodes()
+                    and ancilla_pair[1] in graph.blue_green.nodes()
                 ):
-                    self.graphX.blue_green[ancilla_pair[0]][ancilla_pair[1]][
+                    graph.blue_green[ancilla_pair[0]][ancilla_pair[1]][
                         "error_probability"
                     ] += probability
 
         # for two need to add to boundaries:
         elif len(ancilla_qubits) == 2:
             if (
-                ancilla_qubits[0] in self.graphX.red_blue.nodes()
-                and ancilla_qubits[1] in self.graphX.red_blue.nodes()
+                ancilla_qubits[0] in graph.red_blue.nodes()
+                and ancilla_qubits[1] in graph.red_blue.nodes()
             ):
-                self.graphX.red_blue[ancilla_qubits[0]][ancilla_qubits[1]][
+                graph.red_blue[ancilla_qubits[0]][ancilla_qubits[1]][
                     "error_probability"
                 ] += probability
                 # is on green boundary
                 for qubit in ancilla_qubits:
-                    if qubit in self.graphX.green_red:
-                        self.graphX.green_red[qubit][
+                    if qubit in graph.green_red:
+                        graph.green_red[qubit][
                             self.layout.ancilla_coords_to_index["vG"]
                         ]["error_probability"] += probability
                     else:
-                        self.graphX.blue_green[qubit][
+                        graph.blue_green[qubit][
                             self.layout.ancilla_coords_to_index["vG"]
                         ]["error_probability"] += probability
             elif (
-                ancilla_qubits[0] in self.graphX.green_red.nodes()
-                and ancilla_qubits[1] in self.graphX.green_red.nodes()
+                ancilla_qubits[0] in graph.green_red.nodes()
+                and ancilla_qubits[1] in graph.green_red.nodes()
             ):
-                self.graphX.green_red[ancilla_qubits[0]][ancilla_qubits[1]][
+                graph.green_red[ancilla_qubits[0]][ancilla_qubits[1]][
                     "error_probability"
                 ] += probability
                 # is on blue boundary
                 for qubit in ancilla_qubits:
-                    if qubit in self.graphX.blue_green:
-                        self.graphX.blue_green[qubit][
+                    if qubit in graph.blue_green:
+                        graph.blue_green[qubit][
                             self.layout.ancilla_coords_to_index["vB"]
                         ]["error_probability"] += probability
                     else:
-                        self.graphX.red_blue[qubit][
+                        graph.red_blue[qubit][
                             self.layout.ancilla_coords_to_index["vB"]
                         ]["error_probability"] += probability
             elif (
-                ancilla_qubits[0] in self.graphX.blue_green.nodes()
-                and ancilla_qubits[1] in self.graphX.blue_green.nodes()
+                ancilla_qubits[0] in graph.blue_green.nodes()
+                and ancilla_qubits[1] in graph.blue_green.nodes()
             ):
-                self.graphX.blue_green[ancilla_qubits[0]][ancilla_qubits[1]][
+                graph.blue_green[ancilla_qubits[0]][ancilla_qubits[1]][
                     "error_probability"
                 ] += probability
                 # is on red boundary
                 for qubit in ancilla_qubits:
-                    if qubit in self.graphX.green_red:
-                        self.graphX.green_red[qubit][
+                    if qubit in graph.green_red:
+                        graph.green_red[qubit][
                             self.layout.ancilla_coords_to_index["vR"]
                         ]["error_probability"] += probability
                     else:
-                        self.graphX.red_blue[qubit][
+                        graph.red_blue[qubit][
                             self.layout.ancilla_coords_to_index["vR"]
                         ]["error_probability"] += probability
 
@@ -316,29 +348,29 @@ class Matching_graph:
             # this handles corner ancillas
             # oh this checking is weird
             if ancilla_qubits[0] in self.red_nodes:
-                self.graphX.green_red[ancilla_qubits[0]][
+                graph.green_red[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vG"]
                 ]["error_probability"] += probability
 
-                self.graphX.red_blue[ancilla_qubits[0]][
+                graph.red_blue[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vB"]
                 ]["error_probability"] += probability
 
             elif ancilla_qubits[0] in self.green_nodes:
-                self.graphX.green_red[ancilla_qubits[0]][
+                graph.green_red[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vR"]
                 ]["error_probability"] += probability
 
-                self.graphX.blue_green[ancilla_qubits[0]][
+                graph.blue_green[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vB"]
                 ]["error_probability"] += probability
 
             else:
-                self.graphX.blue_green[ancilla_qubits[0]][
+                graph.blue_green[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vG"]
                 ]["error_probability"] += probability
 
-                self.graphX.red_blue[ancilla_qubits[0]][
+                graph.red_blue[ancilla_qubits[0]][
                     self.layout.ancilla_coords_to_index["vR"]
                 ]["error_probability"] += probability
 

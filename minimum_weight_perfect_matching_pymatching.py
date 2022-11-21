@@ -26,13 +26,21 @@ class MWPM:
             )
         )
         g5 = Matching_graph(distance, n_layers=1, error_model=error_model)
-        #        self.matching_graph = g5.graphX
-        self.coords_matching_graph = g5.graphX
-        self.matching_graph = copy.copy(g5.graphX)
 
-        self.matching_graph.green_red = g5.green_red
-        self.matching_graph.blue_green = g5.blue_green
-        self.matching_graph.red_blue = g5.red_blue
+        self.coords_matching_graph_X = g5.graphX
+        self.matching_graph_X = copy.copy(g5.graphX)
+
+        self.matching_graph_X.green_red = g5.green_red_X
+        self.matching_graph_X.blue_green = g5.blue_green_X
+        self.matching_graph_X.red_blue = g5.red_blue_X
+
+
+        self.coords_matching_graph_Z = g5.graphZ
+        self.matching_graph_Z = copy.copy(g5.graphZ)
+        
+        self.matching_graph_Z.green_red = g5.green_red_Z
+        self.matching_graph_Z.blue_green = g5.blue_green_Z
+        self.matching_graph_Z.red_blue = g5.red_blue_Z
 
     def initialize_blossom(self):
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -55,17 +63,14 @@ class MWPM:
         self.blossom = self.ffi.dlopen(blossom_path)
         self.ffi.cdef(cdef_str)
 
-    def single_run(self, error_cor=None):
+    def single_run(self, matching_graph, coords_matching_graph, error_cor=None):
 
         if error_cor is None:
             error_cor = self.layout.create_error()
 
         red_green_matching, red_blue_matching, green_blue_matching = self.get_matching(
-            error_cor
+            error_cor, matching_graph, coords_matching_graph
         )
-        #        print(red_green_matching.edges(), "red green")
-        #        print(red_blue_matching.edges(), "red blue")
-        #        print(green_blue_matching.edges(), "green blue")
         correction = set()
         graph = nx.compose_all(
             [red_green_matching, red_blue_matching, green_blue_matching]
@@ -295,18 +300,18 @@ class MWPM:
                     rho_vertices.add(node)
         return rho_vertices
 
-    def get_matching(self, error_cor):
+    def get_matching(self, error_cor,matching_graph, coords_matching_graph):
         red_green_error_index = [
             self.layout.ancilla_coords_to_index[coords]
             for coords in error_cor["red"].union(error_cor["green"])
         ]
         red_green_matching = self.create_two_colour_matching(
-            red_green_error_index, self.matching_graph.green_red
+            red_green_error_index, matching_graph.green_red
         )
 
         red_green_matching = self.translate_pymatching(
             red_green_matching,
-            self.coords_matching_graph.green_red,
+            coords_matching_graph.green_red,
             [len(self.layout.ancilla_qubits), len(self.layout.ancilla_qubits) + 1],
         )
 
@@ -315,11 +320,11 @@ class MWPM:
             for coords in error_cor["blue"].union(error_cor["green"])
         ]
         blue_green_matching = self.create_two_colour_matching(
-            blue_green_error_index, self.matching_graph.blue_green
+            blue_green_error_index, matching_graph.blue_green
         )
         blue_green_matching = self.translate_pymatching(
             blue_green_matching,
-            self.coords_matching_graph.blue_green,
+            coords_matching_graph.blue_green,
             [len(self.layout.ancilla_qubits), len(self.layout.ancilla_qubits) + 2],
         )
 
@@ -328,11 +333,11 @@ class MWPM:
             for coords in error_cor["red"].union(error_cor["blue"])
         ]
         red_blue_matching = self.create_two_colour_matching(
-            red_blue_error_index, self.matching_graph.red_blue
+            red_blue_error_index, matching_graph.red_blue
         )
         red_blue_matching = self.translate_pymatching(
             red_blue_matching,
-            self.coords_matching_graph.red_blue,
+            coords_matching_graph.red_blue,
             [len(self.layout.ancilla_qubits) + 1, len(self.layout.ancilla_qubits) + 2],
         )
 

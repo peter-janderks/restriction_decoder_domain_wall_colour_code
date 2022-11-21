@@ -20,8 +20,11 @@ class Calculate_Threshold:
         for d in distance_array:
             print(d, "distance")
             ler_a = []
+            ler_x_a = []
+            ler_z_a = []
             ler_eb_array = []
             for per in per_list:
+                print(per, "per")
                 mp.freeze_support()
                 pool = mp.Pool()
                 results = []
@@ -41,19 +44,29 @@ class Calculate_Threshold:
                 pool.close()
                 pool.join()
                 total_errors = 0
+                x_errors = 0
+                z_errors = 0
                 total_runs = 0
                 for result in results:
                     new_result = result.get()
                     total_errors += new_result[0]
-                    total_runs += new_result[1]
+                    x_errors += new_result[1]
+                    z_errors += new_result[2]
+                    total_runs += new_result[3]
                 ler = total_errors / total_runs
+                ler_x = x_errors / total_runs
+                ler_z = z_errors / total_runs
                 ler_a.append(ler)
+                ler_x_a.append(ler_x)
+                ler_z_a.append(ler_z)
                 ler_eb_array.append(np.sqrt((1 - ler) * ler / total_runs))
 
             self.ler_distances.append(ler_a)
             self.data = dict()
             self.data[str(d)] = dict()
             self.data[str(d)]["ler"] = list(ler_a)
+            self.data[str(d)]["ler_x"] = list(ler_x_a)
+            self.data[str(d)]["ler_z"] = list(ler_z_a)
             self.data[str(d)]["per"] = list(per_list)
             self.data[str(d)]["ler_eb"] = list(ler_eb_array)
             self.save_data(d)
@@ -61,13 +74,13 @@ class Calculate_Threshold:
     def task(self, pid, d, per, bias, n_runs, n_logicals):
         np.random.seed(random.randint(10000, 20000))
         model = Calculate_LER(d, per, bias)
-        l_errors, n_runs = model.run(n_runs, n_logicals)
-        return l_errors, n_runs
+        l_errors, l_errors_x, l_errors_z, n_runs = model.run(n_runs, n_logicals)
+        return l_errors, l_errors_x, l_errors_z, n_runs
 
     def save_data(self, d):
 
         file_name = Path(
-            "./new_data/6.6.6_DW(23)_-pi4_bias_"
+            "./data_18_11/6.6.6_DW(23)_-pi4_bias_"
             + str(self.bias)
             + str()
             + "/_n_runs_"
@@ -88,43 +101,54 @@ class Calculate_Threshold:
 
 
 if __name__ == "__main__":
-    """
-    per_list = np.linspace(0.2, 0.4, 20)
-    distance_array = [25]
-    n_runs = 300000
-    n_logical_errors = 1000
-    bias = 10
+
+    per_list = np.linspace(0.08, 0.14, 11)
+#    distance_array = [5, 7, 9, 11, 13]
+    n_runs = 1000000
+    n_logical_errors = 10000
+    bias = 0.5
     cpus = 10
+    """
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
-    per_list = np.linspace(0.25, 0.45, 20)
-    distance_array = [7, 9, 11, 13, 15, 17, 19]
-    n_runs = 250000
-    bias = 30
-    cpus = 10
-    Calculate_Threshold(per_list, distance_array, n_runs, bias, cpus)
+    bias = 1
+    per_list = np.linspace(0.09, 0.15, 11)
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+
+    bias = 3
+    per_list = np.linspace(0.15, 0.2, 11)
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+
+    distance_array = [5,7,9,11,13,19,25]
+    per_list = np.linspace(0.2, 0.25, 11)
+    bias = 10
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
     """
-    per_list = np.linspace(0.42, 0.5, 10)
+    per_list = np.linspace(0.2, 0.3, 21)
+    bias = 30
+    distance_array = [25, 27, 29]
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+    """
     distance_array = [25]
-    n_runs = 300000
-    n_logical_errors=1000
+    per_list = np.linspace(0.28, 0.4, 20)
     bias = 100
-    cpus = 8
+    Calculate_Threshold(per_list, distance_array, n_runs,n_logical_errors, bias, cpus)
+    
+    distance_array = [17,21,23]
+    per_list = np.linspace(0.28, 0.4, 20)
+    bias = 100
     Calculate_Threshold(per_list, distance_array, n_runs,n_logical_errors, bias, cpus)
 
-    per_list = np.linspace(0.45, 0.5, 10)
-    distance_array = [13,19,25]
-    n_runs = 300000
-    n_logical_errors=1000
+
+    distance_array = [5,7,9,11,13,15,17,19,21,23,25]
+    per_list = np.linspace(0.45, 0.5, 11)
+    Calculate_Threshold(per_list, distance_array, n_runs,n_logical_errors, bias, cpus)
+
+    distance_array = [5,7,9,11,13]
+    per_list = np.linspace(0.45, 0.5, 11)
     bias = 300
-    cpus = 8
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors,bias, cpus)
 
-    per_list = np.linspace(0.45, 0.5, 10)
-    distance_array = [13,19,25]
-    n_runs = 300000
-    n_logical_errors=1000
     bias = 1000
-    cpus = 8
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-
+    """

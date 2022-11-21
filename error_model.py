@@ -12,26 +12,28 @@ class BiasedNoiseModel:
         self, error_probability: float, bias: int, layout: Hexagonal_layout
     ):  # data_qubit_set: Set[Tuple[int, int]]):
         """
-
-            Probality for X,Y,Z is p/3, so probability for error causing an
+        Probality for X,Y,Z is p/3, so probability for error causing an
         ancilla qubit to fire 2p/3
         """
         self.error_probability = error_probability
         self.bias = bias
         self.layout = layout
-        self.error_probability_dict = self.create_error_probabilities()
+        self.error_probability_dict_X, self.error_probability_dict_Z = self.create_error_probabilities()
 
     def create_random_error(self) -> set:
         # do this!
 
-        error_cords = set(
+        error_cords_X = set(
             qubit_coordinates
-            for qubit_coordinates, probability in self.error_probability_dict.items()
+            for qubit_coordinates, probability in self.error_probability_dict_X.items()
             if np.random.rand() < probability
         )
-        # yeah this is a data qubit error of cours
-        #      error_cords = set(i for i in self.qubits if int_sample(self.p_array) == 1)
-        return error_cords
+        error_cords_Z = set(
+            qubit_coordinates
+            for qubit_coordinates, probability in self.error_probability_dict_Z.items()
+            if np.random.rand() < probability
+        )
+        return error_cords_X, error_cords_Z
 
     def get_data_qubits_to_flip(self):
         data_qubits_to_flip = set()
@@ -51,24 +53,23 @@ class BiasedNoiseModel:
         return data_qubits_to_flip
 
     def create_error_probabilities(self):
-        error_probability_dict = dict()
-        if self.bias == 1:
-            for qubit in self.layout.data_qubits:
-                error_probability_dict[qubit] = 2 / 3 * self.error_probability
-        else:
-            pzy = (
-                self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)
-            ) * self.error_probability  # pz+py
-            pxy = 2 / (2 * self.bias + 2) * self.error_probability  # px+py
+        error_probability_dict_X = dict()
+        error_probability_dict_Z = dict()
+        pzy = (
+            self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)
+        ) * self.error_probability  # pz+py
+        pxy = 2 / (2 * self.bias + 2) * self.error_probability  # px+py
 
-            data_qubits_to_flip = self.get_data_qubits_to_flip()
-            for qubit in self.layout.data_qubits:
-                if qubit in data_qubits_to_flip:
-                    error_probability_dict[qubit] = pzy
-                else:
-                    error_probability_dict[qubit] = pxy
+        data_qubits_to_flip = self.get_data_qubits_to_flip()
+        for qubit in self.layout.data_qubits:
+            if qubit in data_qubits_to_flip:
+                error_probability_dict_X[qubit] = pzy
+                error_probability_dict_Z[qubit] = pxy
+            else:
+                error_probability_dict_X[qubit] = pxy
+                error_probability_dict_Z[qubit] = pzy
 #        print(error_probability_dict)
-        return error_probability_dict
+        return error_probability_dict_X, error_probability_dict_Z
 
 
 class ColourCodeXErrorModel(object):

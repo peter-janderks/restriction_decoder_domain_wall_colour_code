@@ -10,7 +10,7 @@ decoder = MWPM(
     layout,
     BiasedNoiseModel(0.4, 100, layout),
 )
-print(decoder.matching_graph.green_red.edges())
+print(decoder.matching_graph_X.green_red.edges())
 unbiased_decoder = MWPM(
     7,
     layout,
@@ -20,51 +20,72 @@ unbiased_decoder = MWPM(
 # decoder_3 = MWPM(3)
 
 
+def data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z):
+    ancilla_error_cords_X = decoder.layout.data_qubits_to_ancilla_qubits(
+        data_qubit_error_X
+    )
+    ancilla_error_X = {
+        "blue": ancilla_error_cords_X.intersection(decoder.layout.ancilla_qubits_blue),
+        "red": ancilla_error_cords_X.intersection(decoder.layout.ancilla_qubits_red),
+        "green": ancilla_error_cords_X.intersection(
+            decoder.layout.ancilla_qubits_green
+        ),
+    }
+
+    ancilla_error_cords_Z = decoder.layout.data_qubits_to_ancilla_qubits(
+        data_qubit_error_Z
+    )
+    ancilla_error_Z = {
+        "blue": ancilla_error_cords_Z.intersection(decoder.layout.ancilla_qubits_blue),
+        "red": ancilla_error_cords_Z.intersection(decoder.layout.ancilla_qubits_red),
+        "green": ancilla_error_cords_Z.intersection(
+            decoder.layout.ancilla_qubits_green
+        ),
+    }
+
+    return (ancilla_error_X, ancilla_error_Z)
+
+
 def test_breaking_error():
-    data_qubit_error = {(6, 6), (10, 4)}
-    ancilla_error_cords = decoder.layout.data_qubits_to_ancilla_qubits(data_qubit_error)
-    ancilla_error = {
-        "blue": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_blue),
-        "red": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_red),
-        "green": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_green),
-    }
-    print(ancilla_error, "ancilla error")
-    correction = decoder.single_run(ancilla_error)
-    print(correction, "correction")
+    data_qubit_error_X = {(6, 6), (10, 4)}
+    data_qubit_error_Z = {(6,6)}
+    (
+        ancilla_error_X,
+        ancilla_error_Z,
+    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z)
+    correction_Z = decoder.single_run(
+        decoder.matching_graph_Z, decoder.coords_matching_graph_Z, ancilla_error_Z
+    )
+    print(correction_Z)
+    assert correction_Z == set()
 
-    data_qubit_error = {(6, 6), (10, 4)}
-    ancilla_error_cords = decoder.layout.data_qubits_to_ancilla_qubits(data_qubit_error)
-    ancilla_error = {
-        "blue": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_blue),
-        "red": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_red),
-        "green": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_green),
-    }
-    print(ancilla_error, "ancilla error")
-    correction = unbiased_decoder.single_run(ancilla_error)
-    print(correction, "correction")
-
+    correction_X = decoder.single_run(
+        decoder.matching_graph_X, decoder.coords_matching_graph_X, ancilla_error_X
+    )
+    resulting_operator = correction_X ^ data_qubit_error_X
+    assert len(resulting_operator) % 2 == 0
 
 test_breaking_error()
 
-
 def test_weight_two_error():
 
-    data_qubit_error = {(15, 1), (16, 0)}
-    ancilla_error_cords = decoder.layout.data_qubits_to_ancilla_qubits(data_qubit_error)
-    ancilla_error = {
-        "blue": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_blue),
-        "red": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_red),
-        "green": ancilla_error_cords.intersection(decoder.layout.ancilla_qubits_green),
-    }
-    correction = decoder.single_run(ancilla_error)
-    print(correction, "correction")
-    resulting_operator = correction ^ data_qubit_error
+    data_qubit_error_X = {(15, 1), (16, 0)}
+    data_qubit_error_Z = {(12,0),(10,0)}
+    (
+        ancilla_error_X,
+        ancilla_error_Z,
+    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z)
+    correction_Z = decoder.single_run(
+        decoder.matching_graph_Z, decoder.coords_matching_graph_Z, ancilla_error_Z
+    )
+    resulting_operator_Z = correction_Z ^ data_qubit_error_Z
+    assert resulting_operator_Z == set()
 
-    assert resulting_operator == {(13, 1), (12, 0), (15, 1), (16, 0)}
-
-    ancilla_error = {"red": {(8, 6)}, "blue": {(8, 4)}, "green": set()}
-    correction = decoder.single_run(ancilla_error)
-    assert len(correction) == 4
+    correction_X = decoder.single_run(
+        decoder.matching_graph_X, decoder.coords_matching_graph_X, ancilla_error_X
+    )
+    resulting_operator_X = correction_X ^ data_qubit_error_X
+    assert resulting_operator_X == set()
 
 
 def test_weight_three_error():
