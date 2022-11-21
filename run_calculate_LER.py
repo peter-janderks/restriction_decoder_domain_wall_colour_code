@@ -102,31 +102,20 @@ class Calculate_Threshold:
 
 if __name__ == "__main__":
 
-    per_list = np.linspace(0.08, 0.14, 11)
-#    distance_array = [5, 7, 9, 11, 13]
     n_runs = 1000000
-    n_logical_errors = 10000
-    bias = 0.5
+    n_logical_errors = 50000
     cpus = 20
-    """
+
+    per_list = np.linspace(0.47, 0.5, 11)
+    bias = 100
+    distance_array = [11, 17, 23]
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
-    bias = 1
-    per_list = np.linspace(0.09, 0.15, 11)
+    bias = 300
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
-    bias = 3
-    per_list = np.linspace(0.15, 0.2, 11)
-    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-
-    distance_array = [5,7,9,11,13,19,25]
-    per_list = np.linspace(0.2, 0.25, 11)
-    bias = 10
-    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-    """
-    per_list = np.linspace(0.2, 0.3, 21)
-    bias = 30
-    distance_array = [25, 27, 29]
+    bias = 1000
+    distance_array = [11, 17, 23]
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
     """
     distance_array = [25]
