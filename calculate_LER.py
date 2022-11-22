@@ -92,10 +92,9 @@ class Calculate_LER(object):
 
                 total_logical_errors += 1
                 if lx_bool == True:
-                    logical_errors_x += 1
+                    logical_errors_x += 1   
                 else:
                     logical_errors_z += 1
-            # program the same for Z
 
             if total_logical_errors == max_logicals:
                 break

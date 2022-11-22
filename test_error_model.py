@@ -115,9 +115,11 @@ def test_create_error_probabilities():
     }
     assert error_probability_dict_X == comparison_probability_dict_X
     assert error_probability_dict_Z == comparison_probability_dict_Z
-
-
+   
 
 def test_create_random_error():
-    noise_model = BiasedNoiseModel(0.1, 10, d3layout)
-    error = noise_model.create_random_error()
+    for _ in range(10):
+        noise_model = BiasedNoiseModel(0.1, 1000, d3layout)
+        error_X,error_Z = noise_model.create_random_error()
+        print(error_X, error_Z)
+

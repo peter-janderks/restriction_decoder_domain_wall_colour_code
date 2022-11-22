@@ -33,10 +33,9 @@ class MWPM:
         self.matching_graph_X.blue_green = g5.blue_green_X
         self.matching_graph_X.red_blue = g5.red_blue_X
 
-
         self.coords_matching_graph_Z = g5.graphZ
         self.matching_graph_Z = copy.copy(g5.graphZ)
-        
+
         self.matching_graph_Z.green_red = g5.green_red_Z
         self.matching_graph_Z.blue_green = g5.blue_green_Z
         self.matching_graph_Z.red_blue = g5.red_blue_Z
@@ -299,7 +298,7 @@ class MWPM:
                     rho_vertices.add(node)
         return rho_vertices
 
-    def get_matching(self, error_cor,matching_graph, coords_matching_graph):
+    def get_matching(self, error_cor, matching_graph, coords_matching_graph):
         red_green_error_index = [
             self.layout.ancilla_coords_to_index[coords]
             for coords in error_cor["red"].union(error_cor["green"])
@@ -331,9 +330,11 @@ class MWPM:
             self.layout.ancilla_coords_to_index[coords]
             for coords in error_cor["red"].union(error_cor["blue"])
         ]
+
         red_blue_matching = self.create_two_colour_matching(
             red_blue_error_index, matching_graph.red_blue
         )
+
         red_blue_matching = self.translate_pymatching(
             red_blue_matching,
             coords_matching_graph.red_blue,

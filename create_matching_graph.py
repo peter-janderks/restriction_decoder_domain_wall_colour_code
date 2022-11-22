@@ -172,32 +172,28 @@ class Matching_graph:
         )
 
     def update_weights_of_edges(self, graph):
+        graph.flipped_red_blue_edges = set()
+        graph.flipped_blue_green_edges = set()
+        graph.flipped_green_red_edges = set()
         for node_1, node_2 in graph.red_blue.edges():
             old_weight = graph.red_blue[node_1][node_2]["error_probability"]
             if old_weight != 0:
-
-                graph.red_blue[node_1][node_2]["weight"] = abs(
-                    np.log((1 - old_weight) / old_weight)
+                graph.red_blue[node_1][node_2]["weight"] = np.log(
+                    (1 - old_weight) / old_weight
                 )
         for node_1, node_2 in graph.blue_green.edges():
-
             old_weight = graph.blue_green[node_1][node_2]["error_probability"]
             if old_weight != 0:
-
-                graph.blue_green[node_1][node_2]["weight"] = abs(
-                    np.log((1 - old_weight) / old_weight)
+                graph.blue_green[node_1][node_2]["weight"] = np.log(
+                    (1 - old_weight) / old_weight
                 )
 
         for node_1, node_2 in graph.green_red.edges():
-
             old_weight = graph.green_red[node_1][node_2]["error_probability"]
             if old_weight != 0:
-
-                graph.green_red[node_1][node_2]["weight"] = abs(
-                    np.log((1 - old_weight) / old_weight)
+                graph.green_red[node_1][node_2]["weight"] = np.log(
+                    (1 - old_weight) / old_weight
                 )
-        # loop through the weights one by one, add one by one
-        # fix this to have boundary nodes
 
     def init_pymatching_graph(self):
         self.red_blue_X = Matching(self.graphX.red_blue)
@@ -250,13 +246,13 @@ class Matching_graph:
         for (
             data_qubit,
             error_probability,
-        ) in self.error_model.error_probability_dict_X.items():
+        ) in self.error_model.low_error_probability_dict_X.items():
             self.translate_single_error(data_qubit, error_probability, self.graphX)
 
         for (
             data_qubit,
             error_probability,
-        ) in self.error_model.error_probability_dict_Z.items():
+        ) in self.error_model.low_error_probability_dict_Z.items():
             self.translate_single_error(data_qubit, error_probability, self.graphZ)
 
     def translate_single_error(self, data_qubit, probability, graph):

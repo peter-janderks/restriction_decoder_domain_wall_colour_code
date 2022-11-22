@@ -36,8 +36,10 @@ def test_init():
         )
     ) == True
     assert g5.layout.ancilla_coords_to_index[(8, 2)] in g5.green_nodes
+    print(g5biased.blue_green_X.edges())
+    print(g5biased.blue_green_Z.edges())
 
-
+test_init()
 def test_translate_error_model():
     g5biased.translate_error_model()
 

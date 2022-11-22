@@ -106,19 +106,36 @@ if __name__ == "__main__":
     n_logical_errors = 50000
     cpus = 20
 
-    per_list = np.linspace(0.3, 0.5, 21)
-    bias = 100
-    distance_array = [11, 17, 23]
+    # per_list = np.linspace(0.3, 0.4, 11)
+    # bias = 300
+    distance_array = [5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
+    # Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+
+
+    per_list = np.linspace(0.2, 0.3, 11)
+    bias = 30
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
-    per_list = np.linspace(0.4, 0.5, 11)
+    per_list = np.linspace(0.2, 0.3, 11)
+    bias = 100
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+
+    per_list = np.linspace(0.28, 0.38, 11)
     bias = 300
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
+    per_list = np.linspace(0.35, 0.45, 11)
+    bias = 1000
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+
+    per_list = np.linspace(0.38, 0.5, 13)
+    bias = 3000
+    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+    """
     per_list = np.linspace(0.45, 0.5, 11)
     bias = 1000
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-    """
+
     distance_array = [25]
     per_list = np.linspace(0.28, 0.4, 20)
     bias = 100

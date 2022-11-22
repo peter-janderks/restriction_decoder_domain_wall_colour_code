@@ -1,26 +1,37 @@
 import pytest
+from create_matching_graph import Matching_graph
 from minimum_weight_perfect_matching_pymatching import MWPM
 import networkx as nx
 from error_model import BiasedNoiseModel
 from layout import Hexagonal_layout
 
-layout = Hexagonal_layout(7)
-decoder = MWPM(
-    7,
-    layout,
-    BiasedNoiseModel(0.4, 100, layout),
+
+# layout = Hexagonal_layout(7)
+layout5 = Hexagonal_layout(5)
+# decoder = MWPM(
+#    7,
+#    layout,
+#    BiasedNoiseModel(0.4, 100, layout),
+# )
+g5biased = Matching_graph(5, BiasedNoiseModel(0.3, 1000, layout5))
+
+decoder5 = MWPM(
+    5,
+    layout5,
+    BiasedNoiseModel(0.3, 1000, layout5),
 )
-print(decoder.matching_graph_X.green_red.edges())
-unbiased_decoder = MWPM(
-    7,
-    layout,
-    BiasedNoiseModel(0.1, 0.5, layout),
-)
+
+# print(decoder.matching_graph_X.green_red.edges())
+# unbiased_decoder = MWPM(
+#    7,
+#    layout,
+#    BiasedNoiseModel(0.1, 0.5, layout),
+# )
 # decoder_5 = MWPM(5)
 # decoder_3 = MWPM(3)
 
 
-def data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z):
+def data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z, decoder):
     ancilla_error_cords_X = decoder.layout.data_qubits_to_ancilla_qubits(
         data_qubit_error_X
     )
@@ -48,7 +59,7 @@ def data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z):
 
 def test_breaking_error():
     data_qubit_error_X = {(6, 6), (10, 4)}
-    data_qubit_error_Z = {(6,6)}
+    data_qubit_error_Z = {(6, 6)}
     (
         ancilla_error_X,
         ancilla_error_Z,
@@ -65,16 +76,15 @@ def test_breaking_error():
     resulting_operator = correction_X ^ data_qubit_error_X
     assert len(resulting_operator) % 2 == 0
 
-test_breaking_error()
 
 def test_weight_two_error():
 
     data_qubit_error_X = {(15, 1), (16, 0)}
-    data_qubit_error_Z = {(12,0),(10,0)}
+    data_qubit_error_Z = {(12, 0), (10, 0)}
     (
         ancilla_error_X,
         ancilla_error_Z,
-    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z)
+    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z, decoder)
     correction_Z = decoder.single_run(
         decoder.matching_graph_Z, decoder.coords_matching_graph_Z, ancilla_error_Z
     )
@@ -83,6 +93,29 @@ def test_weight_two_error():
 
     correction_X = decoder.single_run(
         decoder.matching_graph_X, decoder.coords_matching_graph_X, ancilla_error_X
+    )
+    resulting_operator_X = correction_X ^ data_qubit_error_X
+    assert resulting_operator_X == set()
+
+
+def test_weird_two_qubit_error():
+    e_model = BiasedNoiseModel(0.3, 1000, layout5)
+    data_qubit_error_X = set()
+    data_qubit_error_Z = {(12, 0), (7, 1)}
+    (
+        ancilla_error_X,
+        ancilla_error_Z,
+    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z, decoder5)
+    correction_Z = decoder5.single_run(
+        decoder5.matching_graph_Z, decoder5.coords_matching_graph_Z, ancilla_error_Z
+    )
+
+    resulting_operator_Z = correction_Z ^ data_qubit_error_Z
+    print(resulting_operator_Z)
+    assert resulting_operator_Z == set()
+
+    correction_X = decoder5.single_run(
+        decoder5.matching_graph_X, decoder5.coords_matching_graph_X, ancilla_error_X
     )
     resulting_operator_X = correction_X ^ data_qubit_error_X
     assert resulting_operator_X == set()
