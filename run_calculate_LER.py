@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     n_runs = 1000000
     n_logical_errors = 50000
-    cpus = 20
+    cpus = 8
 
     # per_list = np.linspace(0.3, 0.4, 11)
     # bias = 300
@@ -112,14 +112,14 @@ if __name__ == "__main__":
     # Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
 
-    per_list = np.linspace(0.2, 0.3, 11)
-    bias = 30
-    Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
+    #per_list = np.linspace(0.2, 0.3, 11)
+    #bias = 30
+    #Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
 
-    per_list = np.linspace(0.2, 0.3, 11)
+    per_list = np.linspace(0.3, 0.4, 11)
     bias = 100
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-
+    """
     per_list = np.linspace(0.28, 0.38, 11)
     bias = 300
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     per_list = np.linspace(0.38, 0.5, 13)
     bias = 3000
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
-    """
+    
     per_list = np.linspace(0.45, 0.5, 11)
     bias = 1000
     Calculate_Threshold(per_list, distance_array, n_runs, n_logical_errors, bias, cpus)
