@@ -86,6 +86,7 @@ def get_data_qubits_to_flip():
         (18, 0),
     }
 
+get_data_qubits_to_flip()
 
 def test_create_error_probabilities():
     noise_model = BiasedNoiseModelMock(0.1, 10, d3layout)

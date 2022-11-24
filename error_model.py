@@ -43,12 +43,12 @@ class BiasedNoiseModel:
     def get_data_qubits_to_flip(self):
         data_qubits_to_flip = set()
         flip_parity = 0
-        for index, i in enumerate(range(0, 2 * self.layout.distance + 5, 2)):
+        for index, i in enumerate(range(0, self.layout.distance**2, 2)):
             if index > 0 and (index - 1) // 3 % 2 == 0:
                 flip_parity = 1
             else:
                 flip_parity = 0
-            for j in range(0, self.layout.distance * 2):
+            for j in range(0, self.layout.distance **2):
                 if (i + j, j) in self.layout.data_qubits:
                     if flip_parity == 1:
                         data_qubits_to_flip.add((i + j, j))
