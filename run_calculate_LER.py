@@ -171,12 +171,12 @@ if __name__ == "__main__":
     distance_list = []
     for index,ratio in enumerate(distance_ratio):
         if index < 5:
-            distance_list.extend(
-                [3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio], [9, 9 * ratio]
+            distance_list.append(
+                [[3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio], [9, 9 * ratio]]
             )
         else:
-            distance_list.extend(
-                [3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio]
+            distance_list.append(
+                [[3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio]]
             )
 
     for index, bias in enumerate(bias_list):
