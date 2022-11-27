@@ -1,45 +1,62 @@
 import json
 from pathlib import Path
+from typing import List
 from calculate_LER import Calculate_LER
 import matplotlib.pyplot as plt
 import numpy as np
 import multiprocessing as mp
 import random
 
+from sim_surface_code_dw import SimSurfaceCode
+
 
 class Calculate_Threshold:
-    def __init__(self, per_list, distance_array, n_runs, n_logical_errors, bias, cpus):
+    def __init__(
+        self, per_list, distance_array, n_runs, n_logical_errors, bias, cpus, code
+    ):
 
         self.per_list = list(per_list)
         self.distance_array = list(distance_array)
         self.n_runs = n_runs
         self.bias = bias
         self.n_logical_errors = n_logical_errors
+        self.code = code
         self.ler_distances = list()
-        print(self.bias, "bias")
         for d in distance_array:
-            print(d, "distance")
+            print(d,'d')
             ler_a = []
             ler_x_a = []
             ler_z_a = []
             ler_eb_array = []
             for per in per_list:
-                print(per, "per")
                 mp.freeze_support()
                 pool = mp.Pool()
                 results = []
                 for i in range(cpus):
-                    result = pool.apply_async(
-                        self.task,
-                        args=(
-                            i,
-                            d,
-                            per,
-                            self.bias,
-                            self.n_runs // cpus,
-                            n_logical_errors // cpus,
-                        ),
-                    )
+                    if code == "ColourCode":
+                        result = pool.apply_async(
+                            self.task,
+                            args=(
+                                i,
+                                d,
+                                per,
+                                self.bias,
+                                self.n_runs // cpus,
+                                n_logical_errors // cpus,
+                            ),
+                        )
+                    else:
+                        result = pool.apply_async(
+                            self.surface_code_task,
+                            args=(
+                                i,
+                                d,
+                                per,
+                                self.bias,
+                                self.n_runs // cpus,
+                                n_logical_errors // cpus,
+                            ),
+                        )
                     results.append(result)
                 pool.close()
                 pool.join()
@@ -62,14 +79,22 @@ class Calculate_Threshold:
                 ler_z_a.append(ler_z)
                 ler_eb_array.append(np.sqrt((1 - ler) * ler / total_runs))
 
+            if type(d) == list:
+                ratio = d[1]/d[0]
+                d = d[0]
+
+            else:
+                ratio = None
             self.ler_distances.append(ler_a)
             self.data = dict()
+
             self.data[str(d)] = dict()
             self.data[str(d)]["ler"] = list(ler_a)
             self.data[str(d)]["ler_x"] = list(ler_x_a)
             self.data[str(d)]["ler_z"] = list(ler_z_a)
             self.data[str(d)]["per"] = list(per_list)
             self.data[str(d)]["ler_eb"] = list(ler_eb_array)
+            self.data[str(d)]['ratio'] = ratio
             self.save_data(d)
 
     def task(self, pid, d, per, bias, n_runs, n_logicals):
@@ -78,22 +103,42 @@ class Calculate_Threshold:
         l_errors, l_errors_x, l_errors_z, n_runs = model.run(n_runs, n_logicals)
         return l_errors, l_errors_x, l_errors_z, n_runs
 
-    def save_data(self, d):
+    def surface_code_task(self, pid, d, per, bias, n_runs, n_logicals):
+        np.random.seed(random.randint(10000, 20000))
+        model = SimSurfaceCode(d[0], d[1], per, code=self.code, bias=bias)
+        l_errors, l_errors_x, l_errors_z, n_runs = model.run(n_runs, n_logicals)
+        return l_errors, l_errors_x, l_errors_z, n_runs
 
-        file_name = Path(
-            "./data_18_11/6.6.6_DW(23)_-pi4_bias_"
-            + str(self.bias)
-            + str()
-            + "/_n_runs_"
-            + str(self.n_runs)
-            + "_n_logical"
-            + str(self.n_logical_errors)
-            + "_distance"
-            + str(d)
-            + "_"
-            + str(np.random.randint(1, 100000))
-            + ".json"
-        )
+    def save_data(self, d):
+        if self.code == "ColourCode":
+            file_name = Path(
+                "./data_18_11/6.6.6_DW(23)_-pi4_bias_"
+                + str(self.bias)
+                + "/_n_runs_"
+                + str(self.n_runs)
+                + "_n_logical"
+                + str(self.n_logical_errors)
+                + "_distance"
+                + str(d)
+                + "_"
+                + str(np.random.randint(1, 100000))
+                + ".json"
+            )
+        else:
+            file_name = Path(
+                f"./data_18_11/{self.code}_bias_"
+                + str(self.bias)
+                + "/_n_runs_"
+                + str(self.n_runs)
+                + "_n_logical"
+                + str(self.n_logical_errors)
+                + "_distance"
+                + str(d)
+                + "_"
+                + str(np.random.randint(1, 100000))
+                + ".json"
+            )
+
         file_name.parent.mkdir(exist_ok=True, parents=True)
         f = open(file_name, "w+")
 
@@ -103,12 +148,35 @@ class Calculate_Threshold:
 
 if __name__ == "__main__":
 
-    n_runs = 1000000
-    n_logical_errors = 1000
-    cpus = 20
+    n_runs = 20000
+    n_logical_errors = 200
+    cpus = 10
+    #bias_list = [3, 5]
+    bias_list = [10,30]#,100]
+    distance_list = [
+        [[5, 5 * 9], [7, 7 * 9], [9, 9 * 9], [11,9*11],[13,9*13]],
+        [[5, 5 * 11], [7, 7 * 11], [9, 9 *11]],
+        [[5, 5 * 23], [7, 7 * 23], [9, 9 *23]],
+
+    ]
+
+    code = "XZZX"
+    per_lists = [np.linspace(0.15, 0.3, 20), np.linspace(0.25, 0.45, 20),np.linspace(0.35, 0.45, 10)]
+    for index, bias in enumerate(bias_list):
+        print(bias,'bias')
+        Calculate_Threshold(
+            per_lists[index],
+            distance_list[index],
+            n_runs,
+            n_logical_errors,
+            bias,
+            cpus,
+            code,
+        )
 
     # per_list = np.linspace(0.3, 0.4, 11)
     #   bias = 300
+    """
     distance_array = [5, 9, 13, 17, 21]
     per_lists = []
     bias_list = []
@@ -149,3 +217,4 @@ if __name__ == "__main__":
 
     for index, bias in enumerate(bias_list):    
         Calculate_Threshold(per_lists[index], distance_array, n_runs, n_logical_errors, bias, cpus)
+    """
