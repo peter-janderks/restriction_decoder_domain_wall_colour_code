@@ -23,7 +23,7 @@ class Calculate_Threshold:
         self.code = code
         self.ler_distances = list()
         for d in distance_array:
-            print(d,'d')
+            print(d, "d")
             ler_a = []
             ler_x_a = []
             ler_z_a = []
@@ -80,7 +80,7 @@ class Calculate_Threshold:
                 ler_eb_array.append(np.sqrt((1 - ler) * ler / total_runs))
 
             if type(d) == list:
-                ratio = d[1]/d[0]
+                ratio = d[1] / d[0]
                 d = d[0]
 
             else:
@@ -94,7 +94,7 @@ class Calculate_Threshold:
             self.data[str(d)]["ler_z"] = list(ler_z_a)
             self.data[str(d)]["per"] = list(per_list)
             self.data[str(d)]["ler_eb"] = list(ler_eb_array)
-            self.data[str(d)]['ratio'] = ratio
+            self.data[str(d)]["ratio"] = ratio
             self.save_data(d)
 
     def task(self, pid, d, per, bias, n_runs, n_logicals):
@@ -148,22 +148,39 @@ class Calculate_Threshold:
 
 if __name__ == "__main__":
 
-    n_runs = 20000
-    n_logical_errors = 200
-    cpus = 10
-    #bias_list = [3, 5]
-    bias_list = [10,30]#,100]
-    distance_list = [
-        [[5, 5 * 9], [7, 7 * 9], [9, 9 * 9], [11,9*11],[13,9*13]],
-        [[5, 5 * 11], [7, 7 * 11], [9, 9 *11]],
-        [[5, 5 * 23], [7, 7 * 23], [9, 9 *23]],
-
-    ]
+    n_runs = 100000
+    n_logical_errors = 2000
+    cpus = 20
+    bias_list = [0.5, 1, 3, 10, 30, 100, 300, 1000]
+    distance_ratio = [1, 3, 5, 7, 11, 23, 53, 157]
 
     code = "XZZX"
-    per_lists = [np.linspace(0.15, 0.3, 20), np.linspace(0.25, 0.45, 20),np.linspace(0.35, 0.45, 10)]
+    per_lists = [
+        np.linspace(0.1, 0.2, 11),
+        np.linspace(0.1, 0.2, 11),
+        np.linspace(0.15, 0.25, 11),
+        np.linspace(0.17, 0.32, 16),
+        np.linspace(0.25, 0.4, 16),
+        np.linspace(0.3, 0.45, 16),
+        np.linspace(0.37, 0.47, 11),
+        np.linspace(0.38, 0.48, 11),
+    ]
+    assert len(bias_list) == len(per_lists)
+    assert len(bias_list) == len(distance_ratio)
+
+    distance_list = []
+    for index,ratio in enumerate(distance_ratio):
+        if index < 5:
+            distance_list.extend(
+                [3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio], [9, 9 * ratio]
+            )
+        else:
+            distance_list.extend(
+                [3, 3 * ratio], [5, 5 * ratio], [7, 7 * ratio]
+            )
+
     for index, bias in enumerate(bias_list):
-        print(bias,'bias')
+        print(bias, "bias")
         Calculate_Threshold(
             per_lists[index],
             distance_list[index],
@@ -174,47 +191,56 @@ if __name__ == "__main__":
             code,
         )
 
-    # per_list = np.linspace(0.3, 0.4, 11)
-    #   bias = 300
-    """
-    distance_array = [5, 9, 13, 17, 21]
+    n_runs = 1000000
+    n_logical_errors = 5000
+    cpus = 20
+    distance_array = [5, 7,9, 13, 15, 17, 21,25]
     per_lists = []
     bias_list = []
 
     bias_list.append(0.5)
-    per_lists.append(np.linspace(0.08,0.18,21))
+    per_lists.append(np.linspace(0.08, 0.18, 21))
 
     bias_list.append(1)
-    per_lists.append(np.linspace(0.1,0.2,21))
+    per_lists.append(np.linspace(0.1, 0.2, 21))
 
     bias_list.append(3)
-    per_lists.append(np.linspace(0.12,0.22,21))
+    per_lists.append(np.linspace(0.12, 0.22, 21))
 
     bias_list.append(10)
-    per_lists.append(np.linspace(0.16,0.26,21))
+    per_lists.append(np.linspace(0.16, 0.26, 21))
 
     bias_list.append(30)
-    per_lists.append(np.linspace(0.2,0.3,21))
-
+    per_lists.append(np.linspace(0.2, 0.3, 21))
 
     bias_list.append(100)
-    per_lists.append(np.linspace(0.25,0.35,21))
+    per_lists.append(np.linspace(0.25, 0.35, 21))
 
     bias_list.append(300)
-    per_lists.append(np.linspace(0.28,0.38,21))
-    
+    per_lists.append(np.linspace(0.28, 0.38, 21))
+
     bias_list.append(1000)
-    per_lists.append(np.linspace(0.3,0.4,21))
+    per_lists.append(np.linspace(0.3, 0.4, 21))
 
     bias_list.append(3000)
-    per_lists.append(np.linspace(0.34,0.44,21))
+    per_lists.append(np.linspace(0.34, 0.44, 21))
 
     bias_list.append(10000)
-    per_lists.append(np.linspace(0.38,0.5,21))
+    per_lists.append(np.linspace(0.38, 0.5, 21))
 
     bias_list.append(30000)
-    per_lists.append(np.linspace(0.38,0.5,21))
+    per_lists.append(np.linspace(0.38, 0.5, 21))
 
-    for index, bias in enumerate(bias_list):    
-        Calculate_Threshold(per_lists[index], distance_array, n_runs, n_logical_errors, bias, cpus)
-    """
+    bias_list.append(100000)
+    per_lists.append(np.linspace(0.38, 0.5, 21))
+
+    for index, bias in enumerate(bias_list):
+        Calculate_Threshold(
+            per_lists[index],
+            distance_array,
+            n_runs,
+            n_logical_errors,
+            bias,
+            cpus,
+            "ColourCode",
+        )
