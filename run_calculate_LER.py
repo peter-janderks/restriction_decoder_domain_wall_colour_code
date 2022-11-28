@@ -149,7 +149,7 @@ class Calculate_Threshold:
 if __name__ == "__main__":
 
     n_runs = 100000
-    n_logical_errors = 2000
+    n_logical_errors = 5000
     cpus = 20
     bias_list = [0.5, 1, 3, 10, 30, 100, 300, 1000]
     distance_ratio = [1, 3, 5, 7, 11, 23, 53, 157]
