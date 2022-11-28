@@ -23,8 +23,7 @@ class Calculate_LER(object):
         logical_errors_x = 0
         logical_errors_z = 0
         total_logical_errors = 0
-        # error = self.create_error()
-        for n_runs in range(1,trials):
+        for n_runs in range(1, trials):
             (
                 data_error_X,
                 data_error_Z,
@@ -92,7 +91,8 @@ class Calculate_LER(object):
 
                 total_logical_errors += 1
                 if lx_bool == True:
-                    logical_errors_x += 1   
+                    logical_errors_x += 1
+
                 if lz_bool == True:
                     logical_errors_z += 1
 
@@ -111,6 +111,8 @@ class Calculate_LER(object):
 
         stabilizer operators always have even parity, therefore we
         can check for a logical error by just checking the parity
+
+        TODO: implement qecsim check
         """
         #        difference = self.layout.logical_operator - resulting_operator
         if len(resulting_operator) % 2 == 1:

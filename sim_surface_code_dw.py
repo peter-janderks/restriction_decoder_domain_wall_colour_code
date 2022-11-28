@@ -72,9 +72,6 @@ class SimSurfaceCode(object):
         elif bias_type == 'Z_inf':
             px_sc, py_sc,pz_sc = 0,0,1
 
-
-#        px_sc, py_sc, pz_sc = self.surface_code_error_model(bias,bias_type)
-        
         for i in range(2*self.n1-1):
             if i < self.n1:
                 for _ in range(self.n2):

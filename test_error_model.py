@@ -92,31 +92,48 @@ def test_create_error_probabilities():
     noise_model = BiasedNoiseModelMock(0.1, 10, d3layout)
     (
         error_probability_dict_X,
+        error_probability_dict_Y,
         error_probability_dict_Z,
+        _,
+        _
     ) = noise_model.create_error_probabilities()
-    pzy = (10 / (10 + 1) + 1 / (2 * 10 + 2)) * 0.1
-    pxy = 2 / (2 * 10 + 2) * 0.1
+    pz = 10 / (10 + 1) *0.1
+    px = 1 / (2 * 10 + 2) * 0.1
+    py = 1 / (2 * 10 + 2) * 0.1
     comparison_probability_dict_X = {
-        (0, 0): pxy,
-        (4, 0): pzy,
-        (6, 0): pzy,
-        (1, 1): pzy,
-        (3, 1): pzy,
-        (3, 3): pxy,
-        (4, 2): pxy,
+        (0, 0): px,
+        (4, 0): pz,
+        (6, 0): pz,
+        (1, 1): pz,
+        (3, 1): pz,
+        (3, 3): px,
+        (4, 2): px,
     }
+
+    comparison_probability_dict_Y = {
+        (0, 0): py,
+        (4, 0): py,
+        (6, 0): py,
+        (1, 1): py,
+        (3, 1): py,
+        (3, 3): py,
+        (4, 2): py,
+    }
+
     comparison_probability_dict_Z = {
-        (0, 0): pzy,
-        (4, 0): pxy,
-        (6, 0): pxy,
-        (1, 1): pxy,
-        (3, 1): pxy,
-        (3, 3): pzy,
-        (4, 2): pzy,
+        (0, 0): pz,
+        (4, 0): px,
+        (6, 0): px,
+        (1, 1): px,
+        (3, 1): px,
+        (3, 3): pz,
+        (4, 2): pz,
     }
     assert error_probability_dict_X == comparison_probability_dict_X
+    assert error_probability_dict_Y == comparison_probability_dict_Y
     assert error_probability_dict_Z == comparison_probability_dict_Z
    
+test_create_error_probabilities()
 
 def test_create_random_error():
     for _ in range(10):

@@ -20,24 +20,32 @@ class BiasedNoiseModel:
         self.layout = layout
         (
             self.error_probability_dict_X,
+            self.error_probability_dict_Y,
             self.error_probability_dict_Z,
             self.low_error_probability_dict_X,
-            self.low_error_probability_dict_Z
+            self.low_error_probability_dict_Z,
         ) = self.create_error_probabilities()
 
     def create_random_error(self) -> set:
-        # do this!
+        error_cords_Y = set(
+            qubit_coordinates
+            for qubit_coordinates, probability in self.error_probability_dict_Y.items()
+            if np.random.rand() < probability
+        )
 
         error_cords_X = set(
             qubit_coordinates
             for qubit_coordinates, probability in self.error_probability_dict_X.items()
             if np.random.rand() < probability
         )
+        error_cords_X ^= error_cords_Y
         error_cords_Z = set(
             qubit_coordinates
             for qubit_coordinates, probability in self.error_probability_dict_Z.items()
             if np.random.rand() < probability
         )
+        error_cords_Z ^= error_cords_Y
+
         return error_cords_X, error_cords_Z
 
     def get_data_qubits_to_flip(self):
@@ -48,7 +56,7 @@ class BiasedNoiseModel:
                 flip_parity = 1
             else:
                 flip_parity = 0
-            for j in range(0, self.layout.distance **2):
+            for j in range(0, self.layout.distance**2):
                 if (i + j, j) in self.layout.data_qubits:
                     if flip_parity == 1:
                         data_qubits_to_flip.add((i + j, j))
@@ -60,33 +68,49 @@ class BiasedNoiseModel:
     def create_error_probabilities(self):
         error_probability_dict_X = dict()
         error_probability_dict_Z = dict()
+        error_probability_dict_Y = dict()
         low_error_probability_dict_X = dict()
         low_error_probability_dict_Z = dict()
         # adding these because it's possible that probabilities are bigger than 0.5 otherwise
         # this leads to negative weights in the matching graph which dijkstra's algorithm can't handle.
-        pzy_low = (self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)) * 0.1  # pz+py
-        pxy_low = 2 / (2 * self.bias + 2) * 0.1  # px+py
+        if self.bias == 'infty':
+            pzy_low = 0.1
+            pxy_low = 0
+            pz = self.error_probability
+            px = 0
+            py = 0
+        else:
+            pzy_low = (self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)) * 0.1  # pz+py
+            pxy_low = 2 / (2 * self.bias + 2) * 0.1  # px+py
 
-        pzy = (
-            self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)
-        ) * self.error_probability  # pz+py
-        pxy = 2 / (2 * self.bias + 2) * self.error_probability  # px+py
+            pz = (self.bias / (self.bias + 1)) * self.error_probability
+            px = 1 / (2 * self.bias + 2) * self.error_probability
+            py = 1 / (2 * self.bias + 2) * self.error_probability
 
         data_qubits_to_flip = self.get_data_qubits_to_flip()
         for qubit in self.layout.data_qubits:
+            error_probability_dict_Y[qubit] = py
             if qubit in data_qubits_to_flip:
-                error_probability_dict_X[qubit] = pzy
-                error_probability_dict_Z[qubit] = pxy
+                error_probability_dict_X[qubit] = pz
+
+                error_probability_dict_Z[qubit] = px
+
                 low_error_probability_dict_X[qubit] = pzy_low
                 low_error_probability_dict_Z[qubit] = pxy_low
 
             else:
-                error_probability_dict_X[qubit] = pxy
-                error_probability_dict_Z[qubit] = pzy
+                error_probability_dict_X[qubit] = px
+                error_probability_dict_Z[qubit] = pz
                 low_error_probability_dict_X[qubit] = pxy_low
                 low_error_probability_dict_Z[qubit] = pzy_low
 
-        return error_probability_dict_X, error_probability_dict_Z, low_error_probability_dict_X, low_error_probability_dict_Z
+        return (
+            error_probability_dict_X,
+            error_probability_dict_Y,
+            error_probability_dict_Z,
+            low_error_probability_dict_X,
+            low_error_probability_dict_Z,
+        )
 
 
 class ColourCodeXErrorModel(object):

@@ -147,7 +147,7 @@ class Calculate_Threshold:
 
 
 if __name__ == "__main__":
-
+    """
     n_runs = 100000
     n_logical_errors = 5000
     cpus = 20
@@ -190,11 +190,11 @@ if __name__ == "__main__":
             cpus,
             code,
         )
-
+    """
     n_runs = 1000000
     n_logical_errors = 5000
     cpus = 20
-    distance_array = [5, 7,9, 13, 15, 17, 21,25]
+    distance_array = [3,5,7,9,11,13,17,21]
     per_lists = []
     bias_list = []
 
@@ -230,11 +230,13 @@ if __name__ == "__main__":
 
     bias_list.append(30000)
     per_lists.append(np.linspace(0.38, 0.5, 21))
+    
 
-    bias_list.append(100000)
-    per_lists.append(np.linspace(0.38, 0.5, 21))
+#    bias_list.append('infty')
+#    per_lists.append(np.linspace(0.4,0.5, 11))
 
     for index, bias in enumerate(bias_list):
+        
         Calculate_Threshold(
             per_lists[index],
             distance_array,

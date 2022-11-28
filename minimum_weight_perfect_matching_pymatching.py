@@ -69,6 +69,7 @@ class MWPM:
         red_green_matching, red_blue_matching, green_blue_matching = self.get_matching(
             error_cor, matching_graph, coords_matching_graph
         )
+
         correction = set()
         graph = nx.compose_all(
             [red_green_matching, red_blue_matching, green_blue_matching]
@@ -442,8 +443,6 @@ class MWPM:
         matching_graph = nx.Graph()
         pairs = []
         keys = list(matching.keys())
-        #        print(keys, "keys")
-        #        print(matching)
         for u in keys:
             v = matching[u]
 
@@ -452,59 +451,62 @@ class MWPM:
 
             elif u == None:
                 try:
-                    path_0 = nx.shortest_path(
+                    path_0_weight, path_0 = nx.single_source_dijkstra(
                         graph, v, boundary_nodes[0], weight="weight"
                     )
                 except:
-                    path_0 = []
+                    path_0_weight, path_0 = np.inf, []
+
                 try:
-                    path_1 = nx.shortest_path(
+                    path_1_weight, path_1 = nx.single_source_dijkstra(
                         graph, v, boundary_nodes[1], weight="weight"
                     )
                 except:
-                    path_1 = []
+                    path_1_weight, path_1 = np.inf, []
 
-                if len(path_0) > len(path_1):
+                if path_0_weight > path_1_weight:
                     path_edges = [
                         (path_1[i], path_1[i + 1]) for i in range(len(path_1) - 1)
                     ]
-                elif len(path_1) > len(path_0):
+
+                else:
                     path_edges = [
                         (path_0[i], path_0[i + 1]) for i in range(len(path_0) - 1)
                     ]
-
                 matching_graph.add_edges_from(path_edges)
 
             elif v == None:
                 try:
-                    path_0 = nx.shortest_path(
+                    path_0_weight, path_0 = nx.single_source_dijkstra(
                         graph, u, boundary_nodes[0], weight="weight"
                     )
-
                 except:
-                    path_0 = []
+                    path_0_weight, path_0 = np.inf, []
+
                 try:
-                    path_1 = nx.shortest_path(
+                    path_1_weight, path_1 = nx.single_source_dijkstra(
                         graph, u, boundary_nodes[1], weight="weight"
                     )
                 except:
-                    path_1 = []
-                if len(path_0) > len(path_1):
+                    path_1_weight, path_1 = np.inf, []
+
+                if path_0_weight > path_1_weight:
                     path_edges = [
                         (path_1[i], path_1[i + 1]) for i in range(len(path_1) - 1)
                     ]
 
-                elif len(path_1) > len(path_0):
+                else:
                     path_edges = [
                         (path_0[i], path_0[i + 1]) for i in range(len(path_0) - 1)
                     ]
                 matching_graph.add_edges_from(path_edges)
             else:
-                path = nx.shortest_path(graph, u, v, weight="weight")
+                _, path = nx.single_source_dijkstra(graph, u, v, weight="weight")
                 path_edges = [(path[i], path[i + 1]) for i in range(len(path) - 1)]
 
                 for node in path[:-1]:
                     matching_graph.add_edges_from(path_edges)
+            
             if v != None:
                 keys.remove(v)
         matching_graph = nx.relabel_nodes(
@@ -512,82 +514,10 @@ class MWPM:
         )
         return matching_graph
 
-    def translate_cmatching(self, matching, cmatching, node2id, graph, boundary_nodes):
-        matching_graph = nx.Graph()
-        pairs = []
-        id2node = {v: k for k, v in node2id.items()}
+    
 
-        for i in range(0, matching, 2):
-            u, v = id2node[cmatching[i]], id2node[cmatching[i + 1]]
-            if type(u) == str and type(v) == str:
-                pass
 
-            elif type(u) == str:
-                try:
-                    path_0 = nx.shortest_path(graph, v, boundary_nodes[0])
-                except:
-                    path_0 = []
-                try:
-                    path_1 = nx.shortest_path(graph, v, boundary_nodes[1])
-                except:
-                    path_1 = []
 
-                if len(path_0) > len(path_1):
-                    path_edges = [
-                        (path_1[i], path_1[i + 1]) for i in range(len(path_1) - 1)
-                    ]
-                elif len(path_1) > len(path_0):
-                    path_edges = [
-                        (path_0[i], path_0[i + 1]) for i in range(len(path_0) - 1)
-                    ]
-
-                matching_graph.add_edges_from(path_edges)
-
-            elif type(v) == str:
-
-                try:
-                    path_0 = nx.shortest_path(graph, u, boundary_nodes[0])
-
-                except:
-                    path_0 = []
-                try:
-                    path_1 = nx.shortest_path(graph, u, boundary_nodes[1])
-                except:
-                    path_1 = []
-
-                if len(path_0) > len(path_1):
-                    path_edges = [
-                        (path_1[i], path_1[i + 1]) for i in range(len(path_1) - 1)
-                    ]
-
-                elif len(path_1) > len(path_0):
-                    path_edges = [
-                        (path_0[i], path_0[i + 1]) for i in range(len(path_0) - 1)
-                    ]
-                matching_graph.add_edges_from(path_edges)
-            else:
-                path = nx.shortest_path(graph, u, v)
-                path_edges = [(path[i], path[i + 1]) for i in range(len(path) - 1)]
-
-                for node in path[:-1]:
-                    matching_graph.add_edges_from(path_edges)
-        return matching_graph
-
-    def create_graph(self, error_cor, graph, boundary_vertices):
-        num_edges = len(error_cor) ** 2
-        num_nodes = len(error_cor) * 2
-        error_ind = []
-        nodes = []
-
-        for er in error_cor:
-            error_ind.append(er)
-            nodes.append(er)
-            nodes.append(str(er) + ", b")
-
-        edges, node2id = self.create_edges(
-            error_ind, nodes, num_edges, graph, boundary_vertices
-        )
-        return (num_nodes, num_edges, edges, node2id)
 
     def create_edges(self, error_ind, nodes, edge_num, graph, boundary_vertices):
         """

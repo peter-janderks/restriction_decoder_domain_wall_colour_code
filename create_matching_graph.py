@@ -181,12 +181,17 @@ class Matching_graph:
                 graph.red_blue[node_1][node_2]["weight"] = np.log(
                     (1 - old_weight) / old_weight
                 )
+            else:
+                graph.red_blue.remove_edge(node_1, node_2)
+
         for node_1, node_2 in graph.blue_green.edges():
             old_weight = graph.blue_green[node_1][node_2]["error_probability"]
             if old_weight != 0:
                 graph.blue_green[node_1][node_2]["weight"] = np.log(
                     (1 - old_weight) / old_weight
                 )
+            else:
+                graph.blue_green.remove_edge(node_1, node_2)
 
         for node_1, node_2 in graph.green_red.edges():
             old_weight = graph.green_red[node_1][node_2]["error_probability"]
@@ -194,6 +199,8 @@ class Matching_graph:
                 graph.green_red[node_1][node_2]["weight"] = np.log(
                     (1 - old_weight) / old_weight
                 )
+            else:
+                graph.green_red.remove_edge(node_1, node_2)
 
     def init_pymatching_graph(self):
         self.red_blue_X = Matching(self.graphX.red_blue)
