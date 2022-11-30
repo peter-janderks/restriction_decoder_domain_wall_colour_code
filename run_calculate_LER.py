@@ -151,9 +151,10 @@ if __name__ == "__main__":
     n_runs = 100000
     n_logical_errors = 5000
     cpus = 20
-    bias_list = [0.5, 1, 3, 10, 30, 100, 300, 1000]
-    distance_ratio = [1, 3, 5, 7, 11, 23, 53, 157]
-
+#    bias_list = [0.5, 1, 3, 10, 30, 100, 300, 1000]
+    bias_list = [30]
+#    distance_ratio = [1, 3, 5, 7, 11, 23, 53, 157]
+    distance_ratio = [11]
     code = "XZZX"
     per_lists = [
         np.linspace(0.1, 0.2, 11),
@@ -193,11 +194,11 @@ if __name__ == "__main__":
     """
     n_runs = 1000000
     n_logical_errors = 5000
-    cpus = 20
-    distance_array = [3,5,7,9,11,13,17,21]
+    cpus = 10 
+    distance_array = [9,11,13,17,21]
     per_lists = []
     bias_list = []
-
+    """
     bias_list.append(0.5)
     per_lists.append(np.linspace(0.08, 0.18, 21))
 
@@ -209,10 +210,10 @@ if __name__ == "__main__":
 
     bias_list.append(10)
     per_lists.append(np.linspace(0.16, 0.26, 21))
-
+    """
     bias_list.append(30)
-    per_lists.append(np.linspace(0.2, 0.3, 21))
-
+    per_lists.append(np.linspace(0.25,0.4,21))
+    """
     bias_list.append(100)
     per_lists.append(np.linspace(0.25, 0.35, 21))
 
@@ -230,11 +231,9 @@ if __name__ == "__main__":
 
     bias_list.append(30000)
     per_lists.append(np.linspace(0.38, 0.5, 21))
-    
-
-#    bias_list.append('infty')
-#    per_lists.append(np.linspace(0.4,0.5, 11))
-
+    """
+    bias_list.append('infty')
+    per_lists.append(np.linspace(0.45,0.5, 11))
     for index, bias in enumerate(bias_list):
         
         Calculate_Threshold(
@@ -246,3 +245,4 @@ if __name__ == "__main__":
             cpus,
             "ColourCode",
         )
+#    """

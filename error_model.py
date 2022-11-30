@@ -80,8 +80,8 @@ class BiasedNoiseModel:
             px = 0
             py = 0
         else:
-            pzy_low = (self.bias / (self.bias + 1) + 1 / (2 * self.bias + 2)) * 0.1  # pz+py
-            pxy_low = 2 / (2 * self.bias + 2) * 0.1  # px+py
+            pzy_low = (self.bias / (self.bias + 1))*0.1 #+ 1 / (2 * self.bias + 2)) * 0.1  # pz+py
+            pxy_low = 1 / (2 * self.bias + 2) * 0.1  # px+py
 
             pz = (self.bias / (self.bias + 1)) * self.error_probability
             px = 1 / (2 * self.bias + 2) * self.error_probability

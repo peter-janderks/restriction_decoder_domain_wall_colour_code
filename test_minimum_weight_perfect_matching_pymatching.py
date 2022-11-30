@@ -105,8 +105,41 @@ def test_error_infinite_bias():
     assert len(resulting_operator_X) % 2 == 0
     assert len(resulting_operator_Z) % 2 == 0
 
+def test_error_bias():
+    layout5 = Hexagonal_layout(5)
+    error_model = BiasedNoiseModel(0.2,30, layout5)
+    g5_inft_biased = Matching_graph(5, error_model)
 
+    decoder5 = MWPM(
+        5,
+        layout5,
+        error_model
+    )
+    print(error_model.error_probability_dict_X)
+    print(error_model.error_probability_dict_Z,'Z')
+    data_qubit_error_X =  {(3,1),(4,2)}
+    data_qubit_error_Z = set()
+    (
+        ancilla_error_X,
+        ancilla_error_Z,
+    ) = data_qubit_errors_to_ancilla(data_qubit_error_X, data_qubit_error_Z,decoder5)
+    print(decoder5.coords_matching_graph_Z.blue_green.edges.data(),'Z')
+    correction_Z = decoder5.single_run(
+        decoder5.matching_graph_Z, decoder5.coords_matching_graph_Z, ancilla_error_Z
+    )
+    print(correction_Z)
+#    print(
+    resulting_operator_Z = data_qubit_error_Z ^ correction_Z
 
+    correction_X = decoder5.single_run(
+        decoder5.matching_graph_X, decoder5.coords_matching_graph_X, ancilla_error_X
+    )
+    print(correction_X)
+    resulting_operator_X = correction_X ^ data_qubit_error_X
+    assert len(resulting_operator_X) % 2 == 0
+    assert len(resulting_operator_Z) % 2 == 0
+
+test_error_bias()
 def test_weight_two_error():
 
     data_qubit_error_X = {(15, 1), (16, 0)}

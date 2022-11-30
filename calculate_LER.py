@@ -53,9 +53,9 @@ class Calculate_LER(object):
             }
 
             if ancilla_error_X != syndrome_correction_X:
-                print(data_error, "data error")
-                print(ancilla_error, "ancilaa")
-                print(syndrome_correction, "syndrome")
+                print(data_error_X, "data error")
+                print(ancilla_error_X, "ancilaa")
+                print(syndrome_correction_X, "syndrome")
 
             correction_Z = self.decoder.single_run(
                 self.decoder.matching_graph_Z,
@@ -91,6 +91,7 @@ class Calculate_LER(object):
 
                 total_logical_errors += 1
                 if lx_bool == True:
+
                     logical_errors_x += 1
 
                 if lz_bool == True:
