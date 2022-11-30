@@ -195,7 +195,7 @@ if __name__ == "__main__":
     n_runs = 1000000
     n_logical_errors = 5000
     cpus = 10 
-    distance_array = [9,11,13,17,21]
+    distance_array = [11,13,17,21]
     per_lists = []
     bias_list = []
     """
@@ -232,8 +232,8 @@ if __name__ == "__main__":
     bias_list.append(30000)
     per_lists.append(np.linspace(0.38, 0.5, 21))
     """
-    bias_list.append('infty')
-    per_lists.append(np.linspace(0.45,0.5, 11))
+    #bias_list.append('infty')
+    #per_lists.append(np.linspace(0.45,0.5, 11))
     for index, bias in enumerate(bias_list):
         
         Calculate_Threshold(
