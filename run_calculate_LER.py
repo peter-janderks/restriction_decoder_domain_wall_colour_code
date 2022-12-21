@@ -14,7 +14,19 @@ class Calculate_Threshold:
     def __init__(
         self, per_list, distance_array, n_runs, n_logical_errors, bias, cpus, code
     ):
+        """Runs Monte Carlo simulations of a QEC code using multiproccessing.
 
+        Data is saved to a json file. See the save function for details.
+
+        Args:
+            per_list: List of physical error rates (floats) to simulate.
+            distance_array: List of distances (integers) to simulate.
+            n_runs: Max number or runs to simulate.
+            n_logical_errors: Max number of logical error to simulate.
+            bias: The bias to simulate, represented using an integer or float.
+            cpus: The number of cpus to use.
+            code: The name of the code to simulate, right now either ColourCode or SurfaceCode.
+        """
         self.per_list = list(per_list)
         self.distance_array = list(distance_array)
         self.n_runs = n_runs
@@ -45,7 +57,7 @@ class Calculate_Threshold:
                                 n_logical_errors // cpus,
                             ),
                         )
-                    else:
+                    elif code == "SurfaceCode"
                         result = pool.apply_async(
                             self.surface_code_task,
                             args=(
@@ -57,6 +69,8 @@ class Calculate_Threshold:
                                 n_logical_errors // cpus,
                             ),
                         )
+                    else:
+                        raise ValueError(f"code must be SurfaceCode or ColourCode, here {code} was passed in.")
                     results.append(result)
                 pool.close()
                 pool.join()

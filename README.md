@@ -1,3 +1,5 @@
-To run the decoder use the file run_calculate_LER.py
+To run the decoder use the file run_calculate_LER.py. 
 
-Plots are in create_threshold_plot.ipynb
+The data used to create the threshold plots is in the folde data_18_11.
+
+Plots are created in create_threshold_plot.ipynb
