@@ -1,21 +1,20 @@
 import os
-from src.utils.layout import Hexagonal_layout
+
+# from utils.layout import Hexagonal_layout
 import itertools as it
 import networkx as nx
 import itertools
 import copy
-from create_matching_graph import Matching_graph
+from decoder.create_matching_graph import Matching_graph
 import numpy as np
 import bidict as bd
+
 
 class MWPM:
     """
     MWPM for hexagonal colour code
     """
-
     def __init__(self, distance, layout, error_model):
-
-        #        self.initialize_blossom()
         self.layout = layout
         self.corr_to_ind = bd.bidict(
             zip(
@@ -38,27 +37,6 @@ class MWPM:
         self.matching_graph_Z.green_red = g5.green_red_Z
         self.matching_graph_Z.blue_green = g5.blue_green_Z
         self.matching_graph_Z.red_blue = g5.red_blue_Z
-
-    def initialize_blossom(self):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        blossom_path = dir_path + "/../blossom5/libblossom.so"
-
-        cdef_str = """
-            typedef struct {
-                int uid;
-                int vid;
-                int weight;
-            } Edge;
-            int Init();
-            int Process(int node_num, int edge_num, Edge *edges);
-            int PrintMatching();
-            int GetMatching(int * matching);
-            int Clean();
-            """
-
-        self.ffi = FFI()
-        self.blossom = self.ffi.dlopen(blossom_path)
-        self.ffi.cdef(cdef_str)
 
     def single_run(self, matching_graph, coords_matching_graph, error_cor=None):
 
@@ -114,7 +92,6 @@ class MWPM:
         return correction
 
     def translate_boundary_neighbors(self, boundary_neighbor, node, neighbors):
-        # colour_dict, neighbors):
         """
         Translate boundary nodes to coordinates. At these coordinates there
         is not actually an ancilla.
@@ -150,7 +127,7 @@ class MWPM:
                         neighbors += [(node[0] - 3, node[1] - 1)]
                 else:
                     neighbors += [(node[0] - 3, node[1] + 1)]
-                # pass  # TODO: green boundary
+
         return neighbors
 
     def find_sigma_and_rho_vertices(self, graph):
@@ -160,9 +137,7 @@ class MWPM:
 
         graph are the highlighted vertices!
         """
-        boundary_nodes = [node for node in graph.nodes() if type(node) == str]
-
-        red_boundaries = [node for node in boundary_nodes if node[1] == "R"]
+        # boundary_nodes = [node for node in graph.nodes() if type(node) == str]
 
         sigma_graphs = []
         sigma_vertices_of_one_component = []
@@ -505,18 +480,13 @@ class MWPM:
 
                 for node in path[:-1]:
                     matching_graph.add_edges_from(path_edges)
-            
+
             if v != None:
                 keys.remove(v)
         matching_graph = nx.relabel_nodes(
             matching_graph, self.layout.ancilla_index_to_coords
         )
         return matching_graph
-
-    
-
-
-
 
     def create_edges(self, error_ind, nodes, edge_num, graph, boundary_vertices):
         """

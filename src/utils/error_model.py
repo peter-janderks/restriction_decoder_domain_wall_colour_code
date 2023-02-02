@@ -1,7 +1,6 @@
 from typing import Set, Tuple
 import numpy as np
-from src.utils.layout import Hexagonal_layout
-
+from utils.layout import Hexagonal_layout
 
 class BiasedNoiseModel:
     """

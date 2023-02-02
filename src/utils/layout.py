@@ -187,6 +187,3 @@ class Hexagonal_layout:
 
         return ancilla_qubits
 
-
-if __name__ == "__main__":
-    x = Hexagonal_layout(5)

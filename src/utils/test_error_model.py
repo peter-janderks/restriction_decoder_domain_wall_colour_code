@@ -18,26 +18,6 @@ class BiasedNoiseModelMock(BiasedNoiseModel):
         self.layout = layout
         self.bias = bias
 
-
-def test_create_random_error():
-    BiasedNoiseModel(0.1, 10, d5layout)
-    pass
-
-
-# test_create_random_error()
-
-
-def calc_ratio():
-    for i in range(101, 110, 2):
-        layout = Hexagonal_layout(i)
-        noise_model = BiasedNoiseModelMock(0.1, 1, layout)
-        flip_data_qubits = noise_model.get_data_qubits_to_flip()
-        print(len(flip_data_qubits) / len(layout.data_qubits), "layout", i)
-
-
-# calc_ratio()
-
-
 def get_data_qubits_to_flip():
     noise_model = BiasedNoiseModelMock(0.1, 1, d5layout)
     flip_data_qubits = noise_model.get_data_qubits_to_flip()
@@ -86,7 +66,6 @@ def get_data_qubits_to_flip():
         (18, 0),
     }
 
-get_data_qubits_to_flip()
 
 def test_create_error_probabilities():
     noise_model = BiasedNoiseModelMock(0.1, 10, d3layout)
@@ -132,12 +111,3 @@ def test_create_error_probabilities():
     assert error_probability_dict_X == comparison_probability_dict_X
     assert error_probability_dict_Y == comparison_probability_dict_Y
     assert error_probability_dict_Z == comparison_probability_dict_Z
-   
-test_create_error_probabilities()
-
-def test_create_random_error():
-    for _ in range(10):
-        noise_model = BiasedNoiseModel(0.1, 1000, d3layout)
-        error_X,error_Z = noise_model.create_random_error()
-        print(error_X, error_Z)
-

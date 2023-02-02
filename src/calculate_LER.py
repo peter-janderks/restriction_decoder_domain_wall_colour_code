@@ -1,6 +1,6 @@
-from src.utils.error_model import BiasedNoiseModel
-from src.utils.layout import Hexagonal_layout
-from src.decoder.minimum_weight_perfect_matching_pymatching import MWPM
+from utils.error_model import BiasedNoiseModel
+from utils.layout import Hexagonal_layout
+from decoder.minimum_weight_perfect_matching_pymatching import MWPM
 
 
 class Calculate_LER(object):
