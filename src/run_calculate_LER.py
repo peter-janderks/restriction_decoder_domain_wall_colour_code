@@ -33,7 +33,6 @@ class Calculate_Threshold:
         self.code = code
         self.ler_distances = list()
         for d in distance_array:
-            print(d, "d")
             ler_a = []
             ler_x_a = []
             ler_z_a = []
@@ -161,10 +160,11 @@ class Calculate_Threshold:
 
 
 if __name__ == "__main__":
-    n_runs = 1000
-    n_logical_errors = 500
-    cpus = 10
-    distance_array = [3,5,7]
+    # update the following parameters to change the simulation
+    n_runs = 100 # maximum number of shots to sample
+    n_logical_errors = 50 # maximum number of logical errors to sample
+    cpus = 10 # number of cpus to use
+    distance_array = [9,11]
     per_lists = []
     bias_list = []
     bias_list.append(30)

@@ -4,8 +4,6 @@ class Hexagonal_layout:
 
     def ancilla_indexes(self, distance):
         x_max = distance + distance // 2
-        if distance > 7:
-            ValueError("not imremented yet, need to add corner qubits!")
 
         self.distance = distance
         self.ancilla_qubits = set()
@@ -50,7 +48,6 @@ class Hexagonal_layout:
             self.ancilla_qubits_green
         )
 
-        self.corner_correction_dict()
         self.ancilla_coords_to_index = {
             coords: index for index, coords in enumerate(self.ancilla_qubits)
         }
@@ -61,26 +58,6 @@ class Hexagonal_layout:
         self.ancilla_index_to_coords = {
             index: coords for coords, index in self.ancilla_coords_to_index.items()
         }
-
-    def corner_correction_dict(self):
-        if self.distance == 7:
-            self.corner_corrections = {
-                "(8, 8)b": (9, 9),
-                "(2, 0)b": (0, 0),
-                "(17, 1)b": (18, 0),
-            }
-        elif self.distance == 5:
-            self.corner_corrections = {
-                "(11, 1)b": (12, 0),
-                "(5, 5)b": (6, 6),
-                "(2, 0)b": (0, 0),
-            }
-        elif self.distance == 3:
-            self.corner_corrections = {
-                "(2, 0)b": (0, 0),
-                "(5, 1)b": (6, 0),
-                "(2, 2)b": (3, 3),
-            }
 
     def red_row(self, x_max, y):
         """
@@ -147,22 +124,6 @@ class Hexagonal_layout:
             x_row += 2
             i += 1
 
-    def pairs_to_path(self, v0, v1, set_of_ancillas):
-        if type(v1) == str:
-            path = self.path_node_to_boundary(v0, set_of_ancillas)
-        else:
-            path = self.path_two_nodes(v0, v1, set_of_ancillas)
-        return path
-
-    def add_boundary_edge(self, v0, matching_graph):
-        matching_graph.add_edge(v0, str(v0) + "b")
-        if v0 in self.ancilla_blue_boundary:
-            matching_graph.nodes[str(v0) + "b"]["colour"] = "b"
-        elif v0 in self.ancilla_green_boundary:
-            matching_graph.nodes[str(v0) + "b"]["colour"] = "g"
-        else:
-            matching_graph.nodes[str(v0) + "b"]["colour"] = "r"
-        return matching_graph
 
     def data_qubits_to_ancilla_qubits(self, data_cords):
         ancilla_qubits = set()
